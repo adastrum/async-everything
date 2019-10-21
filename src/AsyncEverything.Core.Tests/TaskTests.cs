@@ -2,45 +2,18 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace AsyncEverything.Core.Tests
 {
     public class TaskTests
     {
-
         [Fact]
         public void ExceptionHandling()
         {
             Assert.Throws<CustomException>(() => CreateTaskThatThrows().GetAwaiter().GetResult());
 
             Assert.Throws<AggregateException>(() => CreateTaskThatThrows().Wait());
-        }
-
-        [Fact]
-        public async Task AsyncLocalVsThreadLocal()
-        {
-            var value = 42;
-
-            var al = new AsyncLocal<int>
-            {
-                Value = value
-            };
-
-            var tl = new ThreadLocal<int>
-            {
-                Value = value
-            };
-
-            await Task.Run(() =>
-            {
-                Assert.Equal(value, al.Value);
-                Assert.Equal(0, tl.Value);
-            })
-            .ContinueWith((previousTask) => Task.Run(() =>
-            {
-                Assert.Equal(value, al.Value);
-                Assert.Equal(0, tl.Value);
-            }), TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         [Fact]
